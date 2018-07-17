@@ -47,6 +47,7 @@ void CEdl::Clear()
   m_vecSceneMarkers.clear();
   m_iTotalCutTime = 0;
   m_lastQueryTime = 0;
+  m_lastCutTime = 0;
 }
 
 bool CEdl::ReadEditDecisionLists(const std::string& strMovie, const float fFrameRate, const int iHeight)
@@ -846,6 +847,16 @@ bool CEdl::InCut(const int iSeek, Cut *pCut)
 int CEdl::GetLastQueryTime() const
 {
   return m_lastQueryTime;
+}
+
+int CEdl::GetLastCutTime() const
+{
+  return m_lastCutTime;
+}
+
+void CEdl::SetLastCutTime(const int iCutTime)
+{
+  m_lastCutTime = iCutTime;
 }
 
 bool CEdl::GetNearestCut(bool bPlus, const int iSeek, Cut *pCut) const

@@ -52,6 +52,9 @@ public:
   int GetTotalCutTime() const;
   int RemoveCutTime(int iSeek) const;
   int RestoreCutTime(int iClock) const;
+  
+  int GetLastCutTime() const;
+  void SetLastCutTime(const int iCutTime);
 
   bool InCut(int iSeek, Cut *pCut = NULL);
   bool GetNearestCut(bool bPlus, const int iSeek, Cut *pCut) const;
@@ -66,6 +69,7 @@ private:
   std::vector<Cut> m_vecCuts;
   std::vector<int> m_vecSceneMarkers;
   int m_lastQueryTime;
+  int m_lastCutTime;
 
   bool ReadEdl(const std::string& strMovie, const float fFramesPerSecond);
   bool ReadComskip(const std::string& strMovie, const float fFramesPerSecond);
