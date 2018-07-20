@@ -4563,6 +4563,25 @@ bool CVideoPlayer::OnAction(const CAction &action)
   switch (action.GetID())
   {
     case ACTION_NEXT_ITEM:
+      if (m_Edl.HasCut())
+      {
+        // If the clip has an EDL, we'll search through that instead of sending a CHANNEL message
+        const int64_t clock = m_omxplayer_mode ? GetTime() : DVD_TIME_TO_MSEC(std::min(m_CurrentAudio.dts, m_CurrentVideo.dts) + m_offset_pts);
+        CEdl::Cut cut;
+        if (m_Edl.GetNearestCut(true, clock, &cut))
+        {
+          CDVDMsgPlayerSeek::CMode mode;
+          mode.time = cut.end + 1;
+          mode.backward = false;
+          mode.accurate = false;
+          mode.restore = true;
+          mode.trickplay = false;
+          mode.sync = true;
+
+          m_messenger.Put(new CDVDMsgPlayerSeek(mode));
+          return true;
+        }
+      }
       if (GetChapter() > 0 && GetChapter() < GetChapterCount())
       {
         m_messenger.Put(new CDVDMsgPlayerSeekChapter(GetChapter() + 1));
@@ -4572,6 +4591,39 @@ bool CVideoPlayer::OnAction(const CAction &action)
       else
         break;
     case ACTION_PREV_ITEM:
+      if (m_Edl.HasCut())
+      {
+        // If the clip has an EDL, we'll search through that instead of sending a CHANNEL message
+        const int64_t clock = m_omxplayer_mode ? GetTime() : DVD_TIME_TO_MSEC(std::min(m_CurrentAudio.dts, m_CurrentVideo.dts) + m_offset_pts);
+        CEdl::Cut cut;
+        if (m_Edl.GetNearestCut(false, clock, &cut))
+        {
+          CDVDMsgPlayerSeek::CMode mode;
+          mode.time = cut.start - 1;
+          mode.backward = true;
+          mode.accurate = false;
+          mode.restore = true;
+          mode.trickplay = false;
+          mode.sync = true;
+
+          m_messenger.Put(new CDVDMsgPlayerSeek(mode));
+          return true;
+        }
+        else
+        {
+          // Go back to beginning
+          CDVDMsgPlayerSeek::CMode mode;
+          mode.time = 0;
+          mode.backward = true;
+          mode.accurate = false;
+          mode.restore = true;
+          mode.trickplay = false;
+          mode.sync = true;
+
+          m_messenger.Put(new CDVDMsgPlayerSeek(mode));
+          return true;
+        }
+      }
       if (GetChapter() > 0)
       {
         m_messenger.Put(new CDVDMsgPlayerSeekChapter(GetChapter() - 1));
